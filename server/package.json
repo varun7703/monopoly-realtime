@@ -1,25 +1,22 @@
 {
   "name": "@monopoly/server",
+  "private": true,
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "tsx src/index.ts",
+    "check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@monopoly/shared": "1.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "mongoose": "^8.18.1",
-    "socket.io": "^4.8.1",
-    "uuid": "^11.1.0"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.4.0",
+    "@types/ws": "^8.18.1",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }

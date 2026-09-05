@@ -1,34 +1,83 @@
-import { FormEvent, useState } from "react";
-import { useGameStore } from "../store/useGameStore";
+import { Copy, Link2, LogIn, ShieldCheck, UserPlus } from "lucide-react";
+import { useMemo, useState } from "react";
 
-export const Lobby = () => {
-  const { playerName, setName, createRoom, joinRoom, startGame, room, error } = useGameStore();
-  const [code, setCode] = useState("");
+type LobbyProps = {
+  status: string;
+  name: string;
+  roomId: string;
+  error: string;
+  onName: (value: string) => void;
+  onRoomId: (value: string) => void;
+  onHost: () => void;
+  onJoin: () => void;
+};
 
-  const submitJoin = (e: FormEvent) => {
-    e.preventDefault();
-    if (code.trim()) joinRoom(code.trim().toUpperCase());
-  };
+export function Lobby({ status, name, roomId, error, onName, onRoomId, onHost, onJoin }: LobbyProps) {
+  const [copied, setCopied] = useState(false);
+  const previewLink = useMemo(() => {
+    if (!roomId.trim()) return "";
+    const url = new URL(window.location.href);
+    url.searchParams.set("room", roomId.trim().toLowerCase());
+    return url.toString();
+  }, [roomId]);
+
+  async function copyPreview() {
+    if (!previewLink) return;
+    await navigator.clipboard?.writeText(previewLink);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  }
 
   return (
-    <div className="rounded-xl border border-zinc-700 p-4 space-y-4 bg-zinc-900">
-      <h2 className="text-xl font-semibold">Lobby</h2>
-      <input className="w-full rounded bg-zinc-800 px-3 py-2" value={playerName} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-      <div className="flex gap-2">
-        <button className="rounded bg-blue-600 px-3 py-2" onClick={createRoom}>Create Room</button>
-        <form onSubmit={submitJoin} className="flex gap-2">
-          <input className="rounded bg-zinc-800 px-3 py-2" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Room code" />
-          <button className="rounded bg-emerald-600 px-3 py-2">Join</button>
-        </form>
-      </div>
-      {room && (
-        <div className="space-y-2">
-          <div>Room: <b>{room.code}</b></div>
-          <div className="text-sm text-zinc-300">{room.players.map((p) => p.name).join(", ")}</div>
-          {!room.game && <button className="rounded bg-purple-600 px-3 py-2" onClick={startGame}>Start Game</button>}
+    <main className="app-shell lobby-page">
+      <section className="lobby-shell">
+        <div className="lobby-copy">
+          <span className="status-pill">
+            <ShieldCheck size={16} />
+            {status}
+          </span>
+          <h1>MONOPOLY</h1>
+          <p>
+            Host an online lobby, share the invite link, and play the classic board with friends in other browsers.
+          </p>
         </div>
-      )}
-      {error && <p className="text-red-400">{error}</p>}
-    </div>
+        <div className="lobby-card">
+          <label>
+            Player name
+            <input value={name} maxLength={16} onChange={(event) => onName(event.target.value)} />
+          </label>
+          <label>
+            Room code <span className="hint">(optional when hosting — leave blank to auto-generate)</span>
+            <input
+              value={roomId}
+              placeholder="e.g. family-night"
+              maxLength={16}
+              onChange={(event) => onRoomId(event.target.value)}
+            />
+          </label>
+          {error && <p className="error-line">{error}</p>}
+          <div className="action-stack">
+            <button className="primary-button" onClick={onHost}>
+              <UserPlus size={18} />
+              Host lobby
+            </button>
+            <button className="primary-button secondary" onClick={onJoin} disabled={!roomId.trim()}>
+              <LogIn size={18} />
+              Join lobby
+            </button>
+          </div>
+          {previewLink && (
+            <div className="invite-preview">
+              <Link2 size={16} />
+              <code>{previewLink}</code>
+              <button type="button" className="icon-button" onClick={copyPreview} title="Copy invite link">
+                <Copy size={16} />
+              </button>
+              {copied && <span className="copied">Copied</span>}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
-};
+}

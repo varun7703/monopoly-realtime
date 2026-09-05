@@ -1,28 +1,8 @@
-# Dependencies
 node_modules/
-
-# Build output
 dist/
-build/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# IDE / Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-
-# TypeScript
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.production.example
+.DS_Store

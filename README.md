@@ -1,140 +1,76 @@
-# Monopoly Realtime (React + Node + Socket.io + MongoDB)
+# Monopoly Online Rooms
 
-Production-oriented, server-authoritative browser Monopoly game with multiplayer lobbies, persistent save/load, auctions, jail logic, cards, mortgages, building rules, and trading.
+Realtime Monopoly with classic-style board UI and shareable online lobbies.
 
-## 1) Architecture Overview
+Frontend look and classic rules are adapted from [u7ter/React-monopoly](https://github.com/u7ter/React-monopoly) (classic US edition board, deeds, houses/hotels, jail, chance/community chest). Multiplayer rooms are server-authoritative over WebSockets.
 
-- `shared`: Monopoly board constants + TypeScript contracts for game state.
-- `server`: authoritative game engine (pure-ish logic), Socket.io networking layer, Mongo persistence.
-- `client`: React + Zustand + Tailwind UI with real-time room/game sync.
+## Workspaces
 
-Design principles:
-- Server owns all state transitions (anti-cheat).
-- Frontend emits intents only (`ROLL`, `BUY_PROPERTY`, `PLACE_BID`, etc.).
-- Engine code remains isolated from transport layer.
+- `client` — Vite + React UI
+- `server` — Express + `ws` room server
+- `shared` — board data and game rules
 
-## 2) Folder Structure
+## Run
 
-```txt
-.
-├─ client/
-│  ├─ src/
-│  │  ├─ components/
-│  │  │  ├─ ActionPanel.tsx
-│  │  │  ├─ Board.tsx
-│  │  │  └─ Lobby.tsx
-│  │  ├─ store/useGameStore.ts
-│  │  ├─ App.tsx
-│  │  ├─ main.tsx
-│  │  └─ styles.css
-│  ├─ index.html
-│  ├─ package.json
-│  └─ vite.config.ts
-├─ server/
-│  ├─ src/
-│  │  ├─ engine/gameEngine.ts
-│  │  ├─ models/SavedGame.ts
-│  │  ├─ network/roomManager.ts
-│  │  ├─ network/socketHandlers.ts
-│  │  └─ index.ts
-│  └─ package.json
-├─ shared/
-│  ├─ src/index.ts
-│  └─ package.json
-├─ docker-compose.yml
-└─ package.json
-```
-
-## 3) Game State Schema
-
-Core state lives in `RuntimeGameState`:
-- Immutable board metadata + mutable per-tile ledger (owner, houses/hotel, mortgage).
-- Players with balances, jail counters, cards, bankruptcy state.
-- Turn index and dice state.
-- Chance/Community deck + discard pile.
-- Auction and trade pending state objects.
-- Log stream and end-game winner.
-
-## 4) Backend API + WebSocket Events
-
-HTTP:
-- `GET /health`
-
-Socket.io:
-- Room: `room:create`, `room:join`, `room:reconnect`, `room:state`
-- Game lifecycle: `game:start`, `game:save`, `game:load`
-- Game action dispatch: `game:action` with action types:
-  - `ROLL`, `BUY_PROPERTY`, `START_AUCTION`, `PLACE_BID`, `PASS_BID`
-  - `BUILD_HOUSE`, `MORTGAGE`, `UNMORTGAGE`
-  - `PROPOSE_TRADE`, `RESPOND_TRADE`
-  - `USE_JAIL_CARD`, `PAY_JAIL_FINE`, `END_TURN`
-- Chat: `chat:send`, `chat:update`
-
-## 5) Monopoly Rules Implemented
-
-- 2-dice turns, doubles logic, triple-double jail.
-- Passing GO rewards.
-- Jail: enter/exit via doubles, card, or fine.
-- Property buy flow + auction fallback.
-- Rent: base, monopoly multiplier, houses/hotels, utilities, railroads.
-- Mortgage/unmortgage.
-- Even building rule enforcement for color sets.
-- Chance/Community draw, shuffle, recycle.
-- Bankruptcy and asset transfer handling.
-- Player-to-player trade proposals and acceptance/rejection.
-
-## 6) Local Setup
-
-### Prerequisites
-- Node.js 20+
-- MongoDB local instance
-
-### Install
 ```bash
 npm install
-```
-
-### Environment
-Server defaults:
-- `PORT=4000`
-- `MONGO_URI=mongodb://127.0.0.1:27017/monopoly`
-
-Client optional:
-- `VITE_SERVER_URL=http://localhost:4000`
-
-Atlas setup:
-1. Copy `.env.example` to `.env`.
-2. Put your Atlas URI in `MONGO_URI`.
-3. In Atlas Network Access, allow your current IP.
-4. In Atlas Database Access, ensure the username/password in URI is valid.
-
-### Run dev
-```bash
 npm run dev
 ```
 
-- Client: `http://localhost:5173`
-- Server: `http://localhost:4000`
+Open `http://localhost:5173/`.
 
-## 7) Deployment Guidance
+- Vite proxies `/ws` to the room server on port `3001`
+- On a LAN, open `http://YOUR_IP:5173/` from other devices
 
-- Build all packages:
-```bash
-npm run build
-```
+## Share a lobby
 
-- Run server:
-```bash
-npm run start
-```
+1. Host clicks **Host lobby** (optional custom room code, or leave blank to auto-generate)
+2. Copy the invite link from the banner (`/?room=CODE`)
+3. Friends open the link, enter a name, and join
+4. Host starts when at least 2 players are ready
 
-- For containerized dev/prod-style startup:
-```bash
-docker compose up --build
-```
+## Features
 
-Recommended production setup:
-- Host server behind Nginx or cloud load balancer.
-- Use managed MongoDB.
-- Use sticky WebSocket sessions or Socket.io adapter for horizontal scaling.
-- Persist room/game state snapshots for recovery on restart.
+- Shareable room codes and invite URLs
+- Max 8 players per room
+- Classic US board names and rent tiers
+- Dice, buy/decline, houses/hotels, mortgage/unmortgage
+- Jail (pay / card / doubles), chance & community chest
+- Server-owned turns and synchronized state
+- Health: `http://localhost:3001/health`
+- Open lobbies: `http://localhost:3001/rooms`
+
+## Still missing vs the reference single-player game
+
+- Player-to-player property trades
+- Auctions when a property is declined
+- Full AI opponents
+- New York City edition board
+
+## Free deployment: Render + Cloudflare Pages
+
+### Backend on Render
+
+1. Push this repository to GitHub.
+2. In Render, create a new **Blueprint** and select this repository.
+3. Render reads `render.yaml` and creates the free Node web service.
+4. After it deploys, copy its public hostname, for example
+   `monopoly-realtime-server.onrender.com`.
+5. Verify `https://YOUR_RENDER_HOST/health` returns JSON with `"ok": true`.
+
+The free Render service can sleep or restart. Rooms and games are currently kept
+in memory, so an active game does not survive a server restart or redeployment.
+
+### Frontend on Cloudflare Pages
+
+Create a Pages project from the same GitHub repository with these settings:
+
+- Framework preset: **Vite**
+- Root directory: `/`
+- Build command: `npm ci && npm run build -w client`
+- Build output directory: `client/dist`
+- Environment variable:
+  `VITE_WS_URL=wss://YOUR_RENDER_HOST/ws`
+
+Deploy after setting the environment variable. Vite embeds it at build time, so
+changing the Render hostname requires a new frontend deployment.

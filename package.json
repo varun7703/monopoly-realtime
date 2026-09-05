@@ -1,18 +1,22 @@
 {
-  "name": "monopoly-realtime",
+  "name": "monopoly-realtime-room",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "workspaces": [
-    "server",
     "client",
+    "server",
     "shared"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w shared\" \"npm run dev -w server\" \"npm run dev -w client\"",
-    "build": "npm run build -w shared && npm run build -w server && npm run build -w client",
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w client && npm run check -w server",
     "start": "npm run start -w server"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.2"
   }
 }

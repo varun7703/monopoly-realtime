@@ -1,258 +1,769 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  font-family: Inter, system-ui, sans-serif;
+:root {
+  --felt: #c8e6c0;
+  --ink: #111827;
+  --panel: #ffffff;
+  --accent: #305bc9;
+  --danger: #d71920;
+  color: var(--ink);
+  background: #f4f4f4;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
-/* ── Board outer layout ─────────────────────────────────── */
-
-.board-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
-  gap: 0.75rem;
-  align-items: start;
-}
-
-.board-wrap {
-  background: #95a574;
-  border-radius: 0.8rem;
-  padding: 0.55rem;
-}
-
-.rf-board-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #cddbb8;
-  border: 6px solid #1f2937;
-  border-radius: 0.55rem;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-}
-
-/* ── React Flow overrides ───────────────────────────────── */
-
-.rf-board-container .react-flow {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.rf-board-container .react-flow__node {
-  padding: 0;
-  border-radius: 0;
-  border: none;
-  background: none;
-  box-shadow: none;
-  /* Prevent React Flow default cursor */
-  cursor: default !important;
-}
-
-.rf-board-container .react-flow__pane {
-  cursor: default !important;
-}
-
-/* hide minimap, controls, attribution */
-.rf-board-container .react-flow__minimap,
-.rf-board-container .react-flow__controls,
-.rf-board-container .react-flow__attribution {
-  display: none !important;
-}
-
-/* ── Center MONOPOLY label ──────────────────────────────── */
-
-.rf-center-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  text-align: center;
-  pointer-events: none;
-}
-
-.rf-center-badge {
-  background: #c81e1e;
-  border: 4px solid #f8f3df;
-  transform: rotate(-22deg);
-  padding: 0.35rem 1.4rem;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-  border-radius: 0.15rem;
-}
-
-.rf-center-logo {
-  font-size: 1.4rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-.rf-center-text {
-  margin-top: 0.5rem;
-  font-size: 0.72rem;
-  color: #1f2937;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* ── Tile node ──────────────────────────────────────────── */
-
-.rf-tile {
-  width: 100%;
-  height: 100%;
-  border: 1px solid #374151;
-  border-radius: 0.2rem;
-  background: #f8f3df;
-  padding: 3px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
+* {
   box-sizing: border-box;
 }
 
-.rf-tile-corner {
-  justify-content: center;
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.lobby-page {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(215, 25, 32, 0.12), transparent 40%),
+    linear-gradient(#f7f7f7, #e8ece8);
+}
+
+.lobby-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 430px);
+  gap: clamp(18px, 4vw, 56px);
+  max-width: 1100px;
+  min-height: calc(100vh - 56px);
+  margin: 0 auto;
+  padding: 28px;
   align-items: center;
-  text-align: center;
 }
 
-.rf-tile-band {
-  height: 7px;
-  min-height: 7px;
-  border-radius: 2px;
-  border: 1px solid rgba(17, 24, 39, 0.45);
+.lobby-copy h1 {
+  width: min(560px, 86vw);
+  margin: 22px 0;
+  padding: 12px 20px;
+  transform: rotate(-8deg);
+  background: var(--danger);
+  color: #fff;
+  border: 4px solid #fff;
+  box-shadow: 0 7px 0 #111827;
+  font-size: clamp(3rem, 9vw, 6.8rem);
+  font-weight: 950;
+  line-height: 1;
 }
 
-.rf-tile-name {
-  font-size: 0.52rem;
-  line-height: 0.62rem;
+.lobby-copy p {
+  max-width: 560px;
+  color: #334155;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #065f46;
+  font-weight: 800;
+}
+
+.lobby-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 2px solid #111;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+}
+
+.lobby-card label {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #111827;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
-.rf-tile-corner .rf-tile-name {
-  font-size: 0.6rem;
-  line-height: 0.75rem;
+.lobby-card .hint {
+  text-transform: none;
+  font-weight: 500;
+  color: #64748b;
 }
 
-.rf-tile-price {
-  font-size: 0.48rem;
-  color: #374151;
-  font-weight: 600;
+.lobby-card input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #94a3b8;
+  padding: 0 12px;
+  background: #fff;
 }
 
-.rf-tile-owner {
-  font-size: 0.45rem;
-  color: #1e3a8a;
-}
-
-.rf-tile-owner span {
-  font-weight: 600;
-}
-
-.rf-tile-buildings {
+.action-stack {
   display: flex;
-  gap: 2px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primary-button,
+.icon-button,
+.control-btn,
+.stats-btn,
+.invite-actions button,
+.invite-actions a,
+.manage-actions button,
+.owned-row {
+  cursor: pointer;
+}
+
+.primary-button {
+  flex: 1;
+  display: inline-flex;
   align-items: center;
-  min-height: 8px;
+  justify-content: center;
+  gap: 9px;
+  height: 46px;
+  border: 0;
+  padding: 0 18px;
+  background: #111827;
+  color: #fff;
+  font-weight: 800;
 }
 
-.rf-house {
-  width: 6px;
-  height: 5px;
-  border-radius: 1px;
-  background: #22c55e;
-  border: 1px solid #14532d;
+.primary-button.secondary {
+  background: #0f766e;
 }
 
-.rf-hotel {
-  font-size: 0.45rem;
+.primary-button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+.invite-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.invite-preview code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #f1f5f9;
+  padding: 6px 8px;
+}
+
+.copied {
+  color: #065f46;
   font-weight: 700;
-  padding: 0 2px;
-  border-radius: 2px;
-  background: #b91c1c;
-  color: white;
 }
 
-.rf-tile-tokens {
+.error-line,
+.error-toast {
+  margin: 0;
+  padding: 10px 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.error-toast {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 40;
+}
+
+.table-page {
+  background: #ececec;
+}
+
+.room-banner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 2px solid #111;
+  background: #fff;
+}
+
+.room-banner strong {
+  display: block;
+}
+
+.room-banner span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.invite-actions code {
+  max-width: min(420px, 60vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+
+.invite-actions button,
+.invite-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #111;
+  background: #305bc9;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.tabletop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px 170px;
+  gap: 12px;
+  padding: 12px;
+  align-items: start;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.board-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.classic-board {
+  width: min(100%, 920px);
+  margin: 0 auto;
+  border: 2px solid #111;
+  background: #111;
+  display: grid;
+  gap: 3px;
+  padding: 3px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.board-mid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 9fr) minmax(0, 1fr);
+  gap: 3px;
+  min-height: 520px;
+}
+
+.board-col {
+  display: grid;
+  grid-template-rows: repeat(9, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.board-cell {
+  position: relative;
+  background: #fff;
+  border: 1px solid #111;
+  min-height: 68px;
+  overflow: hidden;
+  font-size: 0.62rem;
+}
+
+.board-cell.is-corner {
+  min-height: 84px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.board-cell.is-mortgaged {
+  opacity: 0.72;
+}
+
+.color-strip {
+  display: block;
+}
+
+.strip-top {
+  height: 14px;
+  border-bottom: 1px solid #111;
+}
+
+.strip-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  border-top: 1px solid #111;
+}
+
+.strip-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  border-right: 1px solid #111;
+}
+
+.strip-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  border-left: 1px solid #111;
+}
+
+.owner-bar {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: 4px;
+}
+
+.cell-body {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  text-align: center;
+  justify-items: center;
+}
+
+.edge-left .cell-body,
+.edge-right .cell-body {
+  padding-inline: 14px 4px;
+}
+
+.edge-right .cell-body {
+  padding-inline: 4px 14px;
+}
+
+.cell-icon {
+  width: 22px;
+  height: auto;
+}
+
+.building-row {
+  display: flex;
+  gap: 1px;
+  justify-content: center;
+}
+
+.building-row img {
+  width: 12px;
+  height: auto;
+}
+
+.token-stack {
+  position: absolute;
+  inset: auto 2px 8px 2px;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  margin-top: auto;
+  justify-content: center;
 }
 
-.rf-token {
+.token-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  outline: 2px solid;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+}
+
+.board-center-panel {
+  background: var(--felt);
+  border: 1px solid #111;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+}
+
+.center-brand {
+  display: inline-block;
+  margin: 0 auto;
+  padding: 10px 18px;
+  transform: rotate(-12deg);
+  background: var(--danger);
+  color: #fff;
+  border: 4px solid #fff;
+  box-shadow: 0 5px 0 #111;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 950;
+}
+
+.center-dice {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.center-dice img,
+.die-row img {
+  width: 42px;
+  height: 42px;
+}
+
+.center-card {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 8px;
+  border: 1px dashed #111;
+  background: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+}
+
+.control-box {
+  border: 2px solid #111;
+  background: #fff;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.control-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--accent);
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+}
+
+.control-menu button {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px;
+}
+
+.control-menu button.active {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.quickstats {
+  border: 2px solid #2563eb;
+  padding: 6px;
+  width: 100px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.die-row {
+  display: flex;
+  gap: 8px;
+}
+
+.alert-box {
+  height: 110px;
+  overflow: auto;
+  border: 1px solid #9ca3af;
+  padding: 6px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  background: #fff;
+}
+
+.landed-box {
+  border: 1px solid #9ca3af;
+  border-top: 0;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.card-note {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.control-btn {
+  border: 1px solid #111;
+  background: #f3f4f6;
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+.control-btn.secondary {
+  background: #fff;
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.manage-pane {
+  display: grid;
+  gap: 8px;
+}
+
+.bank-buildings {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.owned-list {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #cbd5e1;
+}
+
+.owned-row {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  text-align: left;
+  padding: 8px;
+  font-size: 0.8rem;
+}
+
+.owned-row.selected {
+  background: #dbeafe;
+}
+
+.owned-row.mortgaged {
+  color: #64748b;
+}
+
+.swatch {
   width: 12px;
   height: 12px;
-  border-radius: 9999px;
-  color: white;
-  font-size: 0.42rem;
-  line-height: 12px;
-  text-align: center;
-  font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid #111;
+  flex: 0 0 auto;
 }
 
-/* ── Deed panel (unchanged) ─────────────────────────────── */
-
-.deed-panel {
-  border: 1px solid #3f3f46;
-  border-radius: 0.75rem;
-  background: #111827;
-  padding: 0.55rem;
-  max-height: 52rem;
-  overflow: auto;
-}
-
-.deed-panel h3 {
-  margin: 0 0 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #e5e7eb;
-}
-
-.deed-list {
+.manage-actions {
   display: grid;
-  gap: 0.45rem;
+  gap: 6px;
 }
 
-.deed-card {
-  border: 1px solid #4b5563;
-  border-radius: 0.4rem;
-  background: #f8f3df;
-  color: #111827;
-  padding: 0.35rem;
+.manage-actions button {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 7px;
 }
 
-.deed-top {
-  height: 0.55rem;
-  border-radius: 0.15rem;
-  border: 1px solid rgba(17, 24, 39, 0.45);
+.manage-actions button:disabled {
+  opacity: 0.45;
 }
 
-.deed-name {
-  margin-top: 0.25rem;
+.moneybar {
+  display: grid;
+  gap: 8px;
+}
+
+.moneybar-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  border: 2px solid #111;
+  background: #fff;
+  padding: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.moneybar-row.is-turn {
+  box-shadow: inset 0 0 0 2px #2563eb;
+}
+
+.moneybar-row.is-bankrupt {
+  opacity: 0.45;
+}
+
+.moneybar-arrow {
+  color: #2563eb;
+}
+
+.moneybar-cash {
+  font-size: 1rem;
+}
+
+.moneybar-meta {
   font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
 }
 
-.deed-meta {
-  font-size: 0.68rem;
-  line-height: 1rem;
+.stats-btn {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 8px;
+  font-weight: 700;
+}
+
+.deed {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 220px;
+  border: 2px solid #111;
+  background: #fff;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.deed-header {
+  padding: 10px;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 1px 0 #000;
+}
+
+.deed table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.deed td {
+  border-top: 1px solid #e5e7eb;
+  padding: 4px 8px;
+}
+
+.deed-special {
+  padding: 12px;
+  font-size: 0.85rem;
+}
+
+.stats-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  padding: 16px;
+}
+
+.stats-modal {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 10px;
+  padding: 18px;
+}
+
+.stats-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.stats-card {
+  border: 2px solid #111;
+  padding: 10px;
+}
+
+.stats-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.stats-card li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.85rem;
 }
 
 @media (max-width: 1100px) {
-  .board-layout {
+  .tabletop {
     grid-template-columns: 1fr;
+  }
+
+  .moneybar {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .deed {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .lobby-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .board-mid {
+    min-height: 360px;
+  }
+
+  .board-cell {
+    min-height: 48px;
+    font-size: 0.48rem;
+  }
+
+  .token-img {
+    width: 16px;
+    height: 16px;
   }
 }
