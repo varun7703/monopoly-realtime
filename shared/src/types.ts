@@ -71,6 +71,7 @@ export type GameState = {
   currentPlayer: PlayerId;
   phase: TurnPhase;
   dice: [number, number] | null;
+  rollId?: number;
   doublesCount: number;
   pendingPurchase: number | null;
   housesLeft: number;

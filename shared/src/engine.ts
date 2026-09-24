@@ -169,6 +169,7 @@ function rollTurn(state: GameState): GameState {
   const dice: [number, number] = [rollDie(), rollDie()];
   const next = cloneState(state);
   next.dice = dice;
+  next.rollId = (state.rollId ?? 0) + 1;
   next.lastCard = null;
   const player = currentPlayer(next);
   const isDoubles = dice[0] === dice[1];

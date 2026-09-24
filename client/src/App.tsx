@@ -14,6 +14,7 @@ import { ControlPanel } from "./components/ControlPanel";
 import { Deed } from "./components/Deed";
 import { Lobby } from "./components/Lobby";
 import { MoneyBar } from "./components/MoneyBar";
+import { useGamePresentation } from "./useGamePresentation";
 
 function resolveSocketUrl() {
   if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL as string;
@@ -33,7 +34,16 @@ export function App() {
   const socketRef = useRef<WebSocket | null>(null);
   const [clientId, setClientId] = useState("");
   const [room, setRoom] = useState<RoomSummary | null>(null);
-  const [game, setGame] = useState<GameState | null>(null);
+  const [serverGame, setGame] = useState<GameState | null>(null);
+  const { displayed: game, rolling, turnNotice } = useGamePresentation(serverGame);
+  const [pending, setPending] = useState(false);
+  const pendingRef = useRef(false);
+  const requestTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  function clearPending() {
+    pendingRef.current = false;
+    setPending(false);
+    clearTimeout(requestTimer.current);
+  }
   const [roomId, setRoomId] = useState(initialRoomFromUrl);
   const [name, setName] = useState(`Player ${Math.floor(Math.random() * 90) + 10}`);
   const [status, setStatus] = useState("Disconnected");
@@ -50,11 +60,12 @@ export function App() {
     const socket = new WebSocket(resolveSocketUrl());
     socketRef.current = socket;
 
-    socket.addEventListener("open", () => setStatus("Connected"));
-    socket.addEventListener("close", () => setStatus("Disconnected"));
+    socket.addEventListener("open", () => { setStatus("Connected"); setError(""); });
+    socket.addEventListener("close", () => { setStatus("Disconnected"); clearPending(); });
     socket.addEventListener("error", () => setError("WebSocket connection failed. Is the server running?"));
     socket.addEventListener("message", (message) => {
       const event = JSON.parse(message.data) as ServerEvent;
+      if (event.type !== "connection:ready") clearPending();
       if (event.type === "connection:ready") {
         setClientId(event.clientId);
         return;
@@ -78,7 +89,7 @@ export function App() {
       }
     });
 
-    return () => socket.close();
+    return () => { clearTimeout(requestTimer.current); socket.close(); };
   }, []);
 
   useEffect(() => {
@@ -101,10 +112,17 @@ export function App() {
   }, [room]);
 
   function send(event: ClientEvent) {
+    if (pendingRef.current || rolling) return;
     if (socketRef.current?.readyState !== WebSocket.OPEN) {
       setError("Socket is not connected yet.");
       return;
     }
+    pendingRef.current = true;
+    setPending(true);
+    requestTimer.current = setTimeout(() => {
+      clearPending();
+      setError("The server is taking longer than expected. Check your connection before trying again.");
+    }, 10000);
     socketRef.current.send(JSON.stringify(event));
   }
 
@@ -122,6 +140,7 @@ export function App() {
   if (!game || !room) {
     return (
       <Lobby
+        busy={pending}
         status={status}
         name={name}
         roomId={roomId}
@@ -158,11 +177,13 @@ export function App() {
 
       <section className="tabletop">
         <div className="board-wrap">
-          <Board game={game} onHoverTile={setHoverTile} />
+          <Board game={game} rolling={rolling || (pending && game.phase === "ROLL")} turnNotice={turnNotice && !rolling} onHoverTile={setHoverTile} />
           <Deed tile={hoverTile} />
         </div>
 
         <ControlPanel
+          busy={pending || rolling || status !== "Connected"}
+          rolling={rolling}
           game={game}
           me={me}
           isMyTurn={isMyTurn}
@@ -188,7 +209,7 @@ export function App() {
         <MoneyBar game={game} clientId={clientId} onViewStats={() => setShowStats(true)} />
       </section>
 
-      {error && <p className="error-toast">{error}</p>}
+      {error && <p className="error-toast" role="alert">{error}</p>}
 
       {showStats && (
         <div className="stats-overlay" onClick={() => setShowStats(false)}>

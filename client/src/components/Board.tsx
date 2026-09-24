@@ -1,15 +1,6 @@
 import type { GameState, Tile } from "@monopoly/shared";
-
-const TOKEN_SRC: Record<string, string> = {
-  car: "/images/monopoly_token_car.png",
-  hat: "/images/monopoly_token_hat.png",
-  ship: "/images/monopoly_token_ship.png",
-  dog: "/images/monopoly_token_dog.png",
-  boot: "/images/monopoly_token_boot.png",
-  cat: "/images/monopoly_token_dog.png",
-  iron: "/images/monopoly_token_iron.png",
-  thimble: "/images/monopoly_token_thimble.png",
-};
+import { Dice } from "./Dice";
+import { PlayerToken } from "./PlayerToken";
 
 const ICON: Partial<Record<Tile["type"], string>> = {
   chance: "/images/chance_icon.png",
@@ -21,10 +12,13 @@ const ICON: Partial<Record<Tile["type"], string>> = {
 
 type BoardProps = {
   game: GameState;
+  rolling: boolean;
+  turnNotice: boolean;
   onHoverTile: (tile: Tile | null) => void;
 };
 
-export function Board({ game, onHoverTile }: BoardProps) {
+export function Board({ game, rolling, turnNotice, onHoverTile }: BoardProps) {
+  const current = game.players.find(player => player.id === game.currentPlayer);
   const top = [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
   const bottom = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
   const left = [19, 18, 17, 16, 15, 14, 13, 12, 11];
@@ -46,15 +40,17 @@ export function Board({ game, onHoverTile }: BoardProps) {
         </div>
 
         <div className="board-center-panel">
+          <span className="eyebrow">BIG DEALS. FRIENDLY RIVALRIES.</span>
           <div className="center-brand">MONOPOLY</div>
-          <p>Classic board · online rooms · share the invite link</p>
-          {game.dice && (
-            <div className="center-dice">
-              <img src={`/images/Die_${game.dice[0]}.png`} alt={`Die ${game.dice[0]}`} />
-              <img src={`/images/Die_${game.dice[1]}.png`} alt={`Die ${game.dice[1]}`} />
-            </div>
-          )}
-          {game.lastCard && <p className="center-card">{game.lastCard}</p>}
+          <p className="table-edition">THE BACKCHODI CLUB</p>
+          <Dice values={game.dice} rolling={rolling} />
+          <div className="roll-caption" role="status" aria-live="polite">
+            {rolling ? "A little luck goes a long way…" : game.dice ? `${game.dice[0] + game.dice[1]} spaces${game.dice[0] === game.dice[1] ? " · Doubles!" : " · Your next opportunity"}` : "Good friends. Questionable investments."}
+          </div>
+          {turnNotice && <div className="turn-announcement" key={game.currentPlayer} role="status" style={{ borderColor: current?.color }}>
+            <span className="eyebrow">UP NEXT</span><strong>{current?.name}</strong><span>Time to make your move</span>
+          </div>}
+          {!rolling && game.lastCard && <p className="center-card" key={game.lastCard}>{game.lastCard}</p>}
         </div>
 
         <div className="board-col">
@@ -122,13 +118,12 @@ function BoardCell({
       </div>
       <div className="token-stack">
         {occupants.map((player) => (
-          <img
+          <PlayerToken
             key={player.id}
-            className="token-img"
-            src={TOKEN_SRC[player.token] ?? TOKEN_SRC.car}
-            alt={player.name}
-            title={`${player.name}${player.inJail && index === 10 ? " (jail)" : ""}`}
-            style={{ outlineColor: player.color }}
+            token={player.token}
+            color={player.color}
+            name={`${player.name}${player.inJail && index === 10 ? " (jail)" : ""}`}
+            active={game.status === "ACTIVE" && player.id === game.currentPlayer}
           />
         ))}
       </div>

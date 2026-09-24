@@ -1,4 +1,5 @@
 import type { GameState } from "@monopoly/shared";
+import { PlayerToken } from "./PlayerToken";
 
 export function MoneyBar({
   game,
@@ -17,7 +18,7 @@ export function MoneyBar({
           className={`moneybar-row ${player.id === game.currentPlayer ? "is-turn" : ""} ${player.bankrupt ? "is-bankrupt" : ""}`}
           style={{ borderColor: player.color }}
         >
-          <div className="moneybar-arrow">{player.id === game.currentPlayer ? "▶" : ""}</div>
+          <PlayerToken token={player.token} color={player.color} name={player.name} active={game.status === "ACTIVE" && player.id === game.currentPlayer} />
           <div>
             <div className="moneybar-name">
               {player.name}

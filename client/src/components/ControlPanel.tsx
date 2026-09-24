@@ -2,6 +2,8 @@ import type { GameState, Player, Tile } from "@monopoly/shared";
 import { ownedTiles, ownsFullGroup } from "@monopoly/shared";
 
 type ControlPanelProps = {
+  busy: boolean;
+  rolling: boolean;
   game: GameState;
   me: Player | null;
   isMyTurn: boolean;
@@ -54,9 +56,11 @@ export function ControlPanel(props: ControlPanelProps) {
   if (game.status === "LOBBY") {
     return (
       <div className="control-box">
-        <h2>Waiting room</h2>
+        <span className="eyebrow">THE TABLE IS OPEN</span>
+        <h2>Gather your crew</h2>
+        <div className="waiting-dots" aria-hidden="true"><i /><i /><i /></div>
         <p>{game.players.length < 2 ? "Need at least 2 players." : "Host can start when ready."}</p>
-        <button className="control-btn" disabled={!isHost || game.players.length < 2} onClick={onStart}>
+        <button className="control-btn" disabled={props.busy || !isHost || game.players.length < 2} onClick={onStart}>
           Start Game
         </button>
       </div>
@@ -74,7 +78,11 @@ export function ControlPanel(props: ControlPanelProps) {
   }
 
   return (
-    <div className="control-box">
+    <fieldset className="control-box" disabled={props.busy} aria-busy={props.busy}>
+      <div className="turn-status" role="status">
+        <span className={`status-dot ${!isMyTurn || props.busy ? "pulsing" : ""}`} />
+        {props.rolling ? "Dice in motion…" : props.busy ? "Updating the table…" : isMyTurn ? "Your move. Make it count." : `${current?.name ?? "Player"} is taking their turn`}
+      </div>
       <div className="control-menu">
         <button className={tab === "buy" ? "active" : ""} onClick={() => onTab("buy")}>
           Buy
@@ -89,10 +97,11 @@ export function ControlPanel(props: ControlPanelProps) {
         <div>${current?.cash ?? 0}</div>
       </div>
 
-      {game.dice && (
+      {game.dice && !props.rolling && (
         <div className="die-row">
-          <img src={`/images/Die_${game.dice[0]}.png`} alt="" />
-          <img src={`/images/Die_${game.dice[1]}.png`} alt="" />
+          <b className="mini-die" aria-label={`Die ${game.dice[0]}`}>{["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][game.dice[0]]}</b>
+          <b className="mini-die" aria-label={`Die ${game.dice[1]}`}>{["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][game.dice[1]]}</b>
+          <span>Total <strong>{game.dice[0] + game.dice[1]}</strong></span>
         </div>
       )}
 
@@ -194,7 +203,7 @@ export function ControlPanel(props: ControlPanelProps) {
           </button>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }
 

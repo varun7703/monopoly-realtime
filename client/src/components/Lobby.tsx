@@ -2,6 +2,7 @@ import { Copy, Link2, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type LobbyProps = {
+  busy: boolean;
   status: string;
   name: string;
   roomId: string;
@@ -12,7 +13,7 @@ type LobbyProps = {
   onJoin: () => void;
 };
 
-export function Lobby({ status, name, roomId, error, onName, onRoomId, onHost, onJoin }: LobbyProps) {
+export function Lobby({ busy, status, name, roomId, error, onName, onRoomId, onHost, onJoin }: LobbyProps) {
   const [copied, setCopied] = useState(false);
   const previewLink = useMemo(() => {
     if (!roomId.trim()) return "";
@@ -42,6 +43,8 @@ export function Lobby({ status, name, roomId, error, onName, onRoomId, onHost, o
           </p>
         </div>
         <div className="lobby-card">
+          <span className="eyebrow">YOUR NEXT GAME NIGHT</span>
+          <h2>Pull up a chair.</h2>
           <label>
             Player name
             <input value={name} maxLength={16} onChange={(event) => onName(event.target.value)} />
@@ -57,11 +60,11 @@ export function Lobby({ status, name, roomId, error, onName, onRoomId, onHost, o
           </label>
           {error && <p className="error-line">{error}</p>}
           <div className="action-stack">
-            <button className="primary-button" onClick={onHost}>
+            <button className="primary-button" onClick={onHost} disabled={busy || status !== "Connected"}>
               <UserPlus size={18} />
-              Host lobby
+              {busy ? "Setting the table…" : "Host lobby"}
             </button>
-            <button className="primary-button secondary" onClick={onJoin} disabled={!roomId.trim()}>
+            <button className="primary-button secondary" onClick={onJoin} disabled={busy || status !== "Connected" || !roomId.trim()}>
               <LogIn size={18} />
               Join lobby
             </button>
